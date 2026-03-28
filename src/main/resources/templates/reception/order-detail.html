@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Chi tiết phiếu sửa chữa</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-4">
+
+<h2>Chi tiết phiếu sửa chữa</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+
+        <!-- ===== PHIẾU ===== -->
+        <h5>Thông tin phiếu</h5>
+        <p><strong>ID:</strong> <span th:text="${order.id}"></span></p>
+        <p><strong>Mô tả lỗi:</strong> <span th:text="${order.description}"></span></p>
+        <p><strong>Ngày nhận:</strong>
+            <span th:text="${#temporals.format(order.receivedDate, 'dd/MM/yyyy HH:mm')}"></span>
+        </p>
+        <p><strong>Trạng thái:</strong>
+            <span class="badge bg-warning" th:text="${order.status}"></span>
+        </p>
+
+        <hr>
+
+        <!-- ===== XE ===== -->
+        <h5>Thông tin xe</h5>
+        <p><strong>Biển số:</strong> <span th:text="${order.car.licensePlate}"></span></p>
+        <p><strong>Hãng xe:</strong> <span th:text="${order.car.brand}"></span></p>
+        <p><strong>Màu sắc:</strong> <span th:text="${order.car.color}"></span></p>
+
+        <hr>
+
+        <!-- ===== KHÁCH HÀNG ===== -->
+        <h5>Thông tin khách hàng</h5>
+        <p><strong>Tên:</strong> <span th:text="${order.car.client.name}"></span></p>
+        <p><strong>SĐT:</strong> <span th:text="${order.car.client.phone}"></span></p>
+        <p><strong>Địa chỉ:</strong> <span th:text="${order.car.client.address}"></span></p>
+
+        <hr>
+
+        <!-- ===== DỊCH VỤ ĐÃ CHỌN ===== -->
+        <div th:if="${serviceItems != null and !#lists.isEmpty(serviceItems)}">
+            <h5>Dịch vụ đã chọn</h5>
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                <tr>
+                    <th>Tên dịch vụ</th>
+                    <th>Đơn giá</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${serviceItems}">
+                    <td th:text="${item.service.name}"></td>
+                    <td th:text="${#numbers.formatDecimal(item.unitPrice,0,'COMMA',0,'POINT')} + ' VNĐ'"></td>
+                    <td th:text="${item.quantity}"></td>
+                    <td th:text="${#numbers.formatDecimal(item.unitPrice * item.quantity,0,'COMMA',0,'POINT')} + ' VNĐ'"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== PHỤ TÙNG ĐÃ CHỌN ===== -->
+        <div th:if="${partItems != null and !#lists.isEmpty(partItems)}">
+            <h5>Phụ tùng đã chọn</h5>
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                <tr>
+                    <th>Tên phụ tùng</th>
+                    <th>Đơn giá</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${partItems}">
+                    <td th:text="${item.part.name}"></td>
+                    <td th:text="${#numbers.formatDecimal(item.unitPrice,0,'COMMA',0,'POINT')} + ' VNĐ'"></td>
+                    <td th:text="${item.quantity}"></td>
+                    <td th:text="${#numbers.formatDecimal(item.unitPrice * item.quantity,0,'COMMA',0,'POINT')} + ' VNĐ'"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== CHƯA CÓ ITEM NÀO ===== -->
+        <div th:if="${(serviceItems == null or #lists.isEmpty(serviceItems))
+                    and (partItems == null or #lists.isEmpty(partItems))}">
+            <p class="text-muted">Chưa có dịch vụ hoặc phụ tùng nào được chọn.</p>
+        </div>
+
+        <hr>
+
+        <!-- ===== TỔNG TIỀN ===== -->
+        <div th:if="${totalAmount > 0}">
+            <h5>Tổng tiền</h5>
+            <p>
+                <strong th:text="${#numbers.formatDecimal(totalAmount,0,'COMMA',0,'POINT')} + ' VNĐ'"></strong>
+            </p>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+            <a th:href="@{/reception/orders}" class="btn btn-secondary btn-sm">
+                Quay lại
+            </a>
+
+            <a th:if="${order.status == T(com.example.demoCNPM.enums.RepairStatus).QUOTED}"
+               th:href="@{'/reception/' + ${order.id} + '/print'}"
+               class="btn btn-info">
+                In hóa đơn
+            </a>
+
+            <a th:href="@{/technical/{id}/items(id=${order.id})}" class="btn btn-success btn-sm">
+                Thêm dịch vụ, phụ tùng
+            </a>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

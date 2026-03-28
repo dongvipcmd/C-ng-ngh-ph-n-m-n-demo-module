@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Tạo phiếu sửa chữa</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-4">
+
+<h2>Nhận xe - Tạo phiếu sửa chữa</h2>
+
+<form th:action="@{/reception/orders/create}" method="post" th:object="${order}">
+
+    <input type="hidden" th:field="*{car.id}" />
+
+    <div class="mb-3">
+        <label class="form-label">Biển số xe</label>
+        <input type="text" class="form-control"
+               th:value="${order.car.licensePlate}" readonly>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Mô tả sơ qua ban đầu</label>
+        <textarea class="form-control" th:field="*{description}" required></textarea>
+    </div>
+
+    <a th:href="@{/reception/select-client/{id}(id=${order.car.client.id})}" class="btn btn-secondary">
+        Hủy
+    </a>
+
+    <button type="submit" class="btn btn-primary">Lưu</button>
+
+</form>
+
+</body>
+</html>

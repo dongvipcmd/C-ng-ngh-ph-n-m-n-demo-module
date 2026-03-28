@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Hóa đơn tạm thời phiếu sửa chữa</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+
+        body {
+            font-size: 14px;
+        }
+
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .invoice-table th, .invoice-table td {
+            padding: 6px;
+            font-size: 14px;
+        }
+
+        .invoice-table th {
+            background-color: #343a40;
+            color: white;
+        }
+
+        .total-amount {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        hr {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body class="container mt-4">
+
+<div class="invoice-header">
+    <h2>HÓA ĐƠN SỬA CHỮA XE</h2>
+    <p th:text="'Ngày: ' + ${#temporals.format(order.receivedDate, 'dd/MM/yyyy HH:mm')}"></p>
+</div>
+
+<!-- THÔNG TIN PHIẾU -->
+<h5>Thông tin phiếu</h5>
+<p><strong>ID:</strong> <span th:text="${order.id}"></span></p>
+<p><strong>Mô tả:</strong> <span th:text="${order.description}"></span></p>
+<hr>
+
+<!-- THÔNG TIN KHÁCH HÀNG -->
+<h5>Thông tin khách hàng</h5>
+<p><strong>Tên:</strong> <span th:text="${order.car.client.name}"></span></p>
+<p><strong>SĐT:</strong> <span th:text="${order.car.client.phone}"></span></p>
+<p><strong>Địa chỉ:</strong> <span th:text="${order.car.client.address}"></span></p>
+<hr>
+
+
+<!-- THÔNG TIN XE -->
+<h5>Thông tin xe</h5>
+<p><strong>Biển số:</strong> <span th:text="${order.car.licensePlate}"></span></p>
+<p><strong>Hãng xe:</strong> <span th:text="${order.car.brand}"></span></p>
+<p><strong>Màu sắc:</strong> <span th:text="${order.car.color}"></span></p>
+<hr>
+
+<!-- DỊCH VỤ -->
+<div th:if="${serviceItems != null and !#lists.isEmpty(serviceItems)}">
+    <h5>Dịch vụ đã chọn</h5>
+    <table class="table table-bordered invoice-table">
+        <thead>
+        <tr>
+            <th>Tên dịch vụ</th>
+            <th>Đơn giá</th>
+            <th>Số lượng</th>
+            <th>Thành tiền</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${serviceItems}">
+            <td th:text="${item.service.name}"></td>
+            <td th:text="${#numbers.formatDecimal(item.unitPrice,0,'COMMA',0,'POINT')} + ' VNĐ'"></td>
+            <td th:text="${item.quantity}"></td>
+            <td th:text="${#numbers.formatDecimal(item.unitPrice * item.quantity,0,'COMMA',0,'POINT')} + ' VNĐ'"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- PHỤ TÙNG -->
+<div th:if="${partItems != null and !#lists.isEmpty(partItems)}">
+    <h5>Phụ tùng đã chọn</h5>
+    <table class="table table-bordered invoice-table">
+        <thead>
+        <tr>
+            <th>Tên phụ tùng</th>
+            <th>Đơn giá</th>
+            <th>Số lượng</th>
+            <th>Thành tiền</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${partItems}">
+            <td th:text="${item.part.name}"></td>
+            <td th:text="${#numbers.formatDecimal(item.unitPrice,0,'COMMA',0,'POINT')} + ' VNĐ'"></td>
+            <td th:text="${item.quantity}"></td>
+            <td th:text="${#numbers.formatDecimal(item.unitPrice * item.quantity,0,'COMMA',0,'POINT')} + ' VNĐ'"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- TỔNG TIỀN -->
+<div class="total-amount mt-3">
+    <span>Tổng cộng: </span>
+    <span th:text="${#numbers.formatDecimal(totalAmount,0,'COMMA',0,'POINT')} + ' VNĐ'"></span>
+</div>
+
+<hr>
+<div class="no-print mt-3">
+    <button class="btn btn-primary" id="printBtn">In hóa đơn</button>
+
+    <!-- Modal thông báo -->
+    <div class="modal fade" id="printSuccessModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-success">Thông báo</h5>
+                </div>
+                <div class="modal-body">
+                    <p>In hóa đơn thành công!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="okBtn">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.getElementById("printBtn").addEventListener("click", function () {
+
+            // Hiển thị modal thông báo
+            var modal = new bootstrap.Modal(document.getElementById('printSuccessModal'));
+            modal.show();
+            // quay ve trang chu
+            document.getElementById("okBtn").addEventListener("click", function () {
+                window.location.href = "/reception/home";
+            });
+        });
+    </script>
+    <a th:href="@{/reception/orders}" class="btn btn-secondary">Quay lại</a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
