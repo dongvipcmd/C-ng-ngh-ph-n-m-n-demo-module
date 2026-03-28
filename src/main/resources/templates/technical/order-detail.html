@@ -108,9 +108,14 @@
             </a>
 
             <a th:if="${order.status == T(com.example.demoCNPM.enums.RepairStatus).QUOTED}"
-               th:href="@{'/reception/' + ${order.id} + '/print'}"
+               th:href="@{/technical/home}"
                class="btn btn-info">
-                In hóa đơn
+                Hoàn tất
+            </a>
+
+
+            <a th:href="@{/technical/{id}/items(id=${order.id})}" class="btn btn-success btn-sm">
+                Thêm dịch vụ, phụ tùng
             </a>
         </div>
     </div>

@@ -3,6 +3,7 @@ package com.example.demoCNPM.controller;
 import com.example.demoCNPM.entity.Part;
 import com.example.demoCNPM.entity.RepairOrder;
 import com.example.demoCNPM.entity.ServiceClass;
+import com.example.demoCNPM.entity.WorkOrderItem;
 import com.example.demoCNPM.enums.ItemType;
 import com.example.demoCNPM.enums.RepairStatus;
 import com.example.demoCNPM.repository.PartRepository;
@@ -96,6 +97,40 @@ public class TechnicalController {
 
         ra.addFlashAttribute("success", "Đã xác nhận báo giá!");
 
-        return "redirect:/reception/orders/orders-detail/" + id;
+        return "redirect:/technical/orders/orders-detail/" + id;
+    }
+
+    @GetMapping("/orders/orders-detail/{id}")
+    public String detailOrder(@PathVariable Long id, Model model) {
+        RepairOrder repairOrder = repairOrderService.findById(id);
+        model.addAttribute("order", repairOrder);
+
+        List<WorkOrderItem> serviceItems = repairOrder.getItems().stream()
+                .filter(i -> i.getType() == ItemType.SERVICE)
+                .toList();
+
+        List<WorkOrderItem> partItems = repairOrder.getItems().stream()
+                .filter(i -> i.getType() == ItemType.PART)
+                .toList();
+
+        model.addAttribute("serviceItems", serviceItems);
+        model.addAttribute("partItems", partItems);
+
+        double total = 0;
+        if(serviceItems != null) {
+            total += serviceItems.stream().mapToDouble(i -> i.getUnitPrice() * i.getQuantity()).sum();
+        }
+        if(partItems != null) {
+            total += partItems.stream().mapToDouble(i -> i.getUnitPrice() * i.getQuantity()).sum();
+        }
+        model.addAttribute("totalAmount", total);
+
+        return "technical/order-detail";
+    }
+
+    @GetMapping("/orders")
+    public String listOrders(Model model) {
+        model.addAttribute("orders", repairOrderService.findAll());
+        return "technical/list-orders";
     }
 }
